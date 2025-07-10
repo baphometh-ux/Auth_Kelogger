@@ -1,4 +1,4 @@
-================================= OSINT_venv Tool =================================
+== Auth_Keylogger ==
 
 Este script configura un pequeño entorno virtual con algunas herramientas que podrian ayudarte a practicar tus habilidade en algun ambiente controlado.
 
@@ -6,15 +6,15 @@ Cabe resaltar que esto es hecho con fines educativo, no tengo la intencion de af
 
 Aun asi ten en cuenta que eres responsable del uso que le des, pero te recomiendo que no hagas nada ilicito o ilegal con esta herramienta ya que puedes meterte en problemas serios.
 
-================= NO ME HAGO RESPONSABLE DEL USO QUE LE DES A ESTE SCRIPT =================
+== NO ME HAGO RESPONSABLE DEL USO QUE LE DES A ESTE SCRIPT ==
 
-================================== Inicio ==================================
+== Inicio ==
 
 Clona el repositorio con git clone:
 
-[+] $> git clone https://github.com/baphometh-ux/Auth-Keylogger
+[+] $> git clone https://github.com/baphometh-ux/Auth_Kelogger
 
-$> cd [Nombre de carpeta]
+$> cd Auth_Keylogger
 
 Despues dentro de la carpeta creas un entorno virtual con: 
 
@@ -34,7 +34,7 @@ $> pip install -r requirements.txt
 
 Despues sigues con la configuracion.
 
-================================== Configuracion del Keylogger ==================================
+== Configuracion del Keylogger ==
 
 La configuracion inicial para crear los correos temporales es la siguiente:
 
