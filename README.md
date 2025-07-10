@@ -8,12 +8,54 @@ Aun asi ten en cuenta que eres responsable del uso que le des, pero te recomiend
 
 ================= NO ME HAGO RESPONSABLE DEL USO QUE LE DES A ESTE SCRIPT =================
 
-Keylogger:
+================================== Inicio ==================================
 
-    Este script usa una herramienta que creo otro usuario [ @aydinnyunus ] yo solo agrege un creador de correos temporales que usaras para registrarte en mailtrap.io, el script ttambien automatiza la configuracion del archivo keylogger.py para estar listo para usar. 
+Clona el repositorio con git clone:
 
-    [+] Repositorio del keylogger: https://github.com/aydinnyunus/Keylogger
+[+] $> git clone https://github.com/baphometh-ux/Auth-Keylogger
 
-    [+] Github de aydinnyunus: https://github.com/aydinnyunus
+$> cd [Nombre de carpeta]
 
-    Le doy los creditos al creador original del script, yo solo agrege un poco de codigo.
+Despues dentro de la carpeta creas un entorno virtual con: 
+
+$> python -m venv .venv
+
+Activas tu entorno virtual:
+
+Windows:
+$> .venv\Scripts\activate.ps1
+
+Linux:
+$> source .venv\bin\activate
+
+Luego instalas las dependencias:
+
+$> pip install -r requirements.txt
+
+Despues sigues con la configuracion.
+
+================================== Configuracion del Keylogger ==================================
+
+La configuracion inicial para crear los correos temporales es la siguiente:
+
+1. Necesitas La RAPIDAPI-KEY y el TOKEN de TempMailSo.
+
+Para conseguir la RAPIDAPI-KEY debes de ir a la pagina web de TempMailSo en rapidapi.com:
+
+[+] https://rapidapi.com/tempmailso-tempmailso-default/api/tempmail-so
+
+y presionas algunos de los endpoints, te aparecera una pantalla divida en dos, de lado izquierdo 3 campos, App, X-RapidAPI-Key y request URL. y del lado derecho te explica como usarlo. Bien pues necesitas la API que aparece en X-RapidAPI-Key. y si no te aparece debes debes crear una aplicacion en tu perfil (Crea un perfil si no lo tienes) y añades un "Authorization Key" luego de eso ya deberia aparecerte la X-RapidAPI-Key.
+
+Para conseguir el TOKEN de TempMailSo debes ir a:
+
+[+] https://tempmail.so/us
+
+Creas una cuenta y una vez creada presionas las tres barritas que aparecen de lado derecho en la parte de arriba, presionas donde esta tu correo te mandara a otra pagina, vuelves a presionar tu correo y te apareceran varias opciones, tu presionas la que dice Account y te aparece "API-Token" y esa es la que necesitas.
+
+2. Cuando hayas clonado ya el repositorio, debes crear un archivo ".env", y dentro del archivo escribes dos lineas:
+
+RAPIDAPI-KEY = [Tu api de X-RapidAPI-Key]
+TEMPMAIL_TOKEN = [Token de la pagina TempMailSo]
+
+lo guardas y listo.
+
