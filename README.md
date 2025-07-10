@@ -12,7 +12,7 @@ Aun asi ten en cuenta que eres responsable del uso que le des, pero te recomiend
 
 Clona el repositorio con git clone:
 
-[+] $> git clone https://github.com/baphometh-ux/Auth_Kelogger
+[+] $> git clone https://github.com/baphometh-ux/Auth_Keylogger
 
 $> cd Auth_Keylogger
 
